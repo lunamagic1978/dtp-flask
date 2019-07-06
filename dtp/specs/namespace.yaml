@@ -1,0 +1,381 @@
+openapi: "3.0.0"
+
+info:
+  title: Dtp
+  version: "v1.0"
+servers:
+  - url: http://0.0.0.0:9090/api/
+
+paths:
+  /namespaces:
+    post:
+      summary: new namespace
+      description: new namespace
+      operationId: dtp.api.namespace.post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["name"]
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                user:
+                  type: string
+
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    get:
+      summary: get namespace
+      description: get namespace
+      operationId: dtp.api.namespace.get
+
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+  /namespaces/{namespace}/project:
+    post:
+      summary: new project
+      description: new project
+      operationId: dtp.api.project.post
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["name", "swagger_json"]
+              properties:
+                name:
+                  type: string
+                user:
+                  type: string
+                swagger_json:
+                    type: string
+                    minLength: 4
+                    example: 'swagger.json'
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    get:
+      summary: get project_list
+      description: get project_list
+      operationId: dtp.api.project.get
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+  /namespaces/{namespace}/projects/{project}:
+    get:
+      summary: get project_detail
+      description: get project_detail
+      operationId: dtp.api.project.detail
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    put:
+      summary: update project_detail
+      description: update project_detail
+      operationId: dtp.api.project.update
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["swagger_json"]
+              properties:
+                user:
+                  type: string
+                swagger_json:
+                    type: string
+                    minLength: 4
+                    example: 'swagger.json'
+
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+
+  /namespaces/{namespace}/projects/{project}/api:
+    get:
+      summary: get api_list
+      description: get api_list
+      operationId: dtp.api.api.get
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    post:
+      summary: new api
+      description: new api
+      operationId: dtp.api.api.post
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/api"
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+  /namespaces/{namespace}/projects/{project}/ref:
+    get:
+      summary: get ref_list
+      description: get ref_list
+      operationId: dtp.api.ref.get
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    post:
+      summary: new ref
+      description: new ref
+      operationId: dtp.api.ref.post
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ref"
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+  /namespaces/{namespace}/projects/{project}/detail:
+    get:
+      summary: get detail api
+      description: gget detail api
+      operationId: dtp.api.api.detail
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: query
+          description: uid of the api
+          required: true
+          schema:
+            type: string
+        - name: method
+          in: query
+          description: uid of the api
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+  /namespaces/{namespace}/projects/{project}/demo:
+    get:
+      summary: get detail api
+      description: gget detail api
+      operationId: dtp.api.api.demo
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: query
+          description: uid of the api
+          required: true
+          schema:
+            type: string
+        - name: method
+          in: query
+          description: uid of the api
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+
+components:
+  schemas:
+    api:
+      type: "object"
+      required: ["swagger_json", "swagger_type"]
+      properties:
+        swagger_type:
+          type: string
+        swagger_json:
+          type: string
+    ref:
+      type: "object"
+      required: ["swagger_json", "swagger_type"]
+      properties:
+        swagger_type:
+          type: string
+        swagger_json:
+          type: string
+

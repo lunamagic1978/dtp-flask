@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "dtp"
+version = "0.1.0"
+description = ""
+authors = ["dameng <pingf0@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+connexion = "^2.2"
+pony = "^0.7.10"
+swagger-ui-bundle = "^0.0.3"
+psycopg2 = "^2.8"
+
+[tool.poetry.dev-dependencies]
+pylint = "^2.3"
+autopep8 = "^1.4"
+
+[[tool.poetry.source]]
+# name = "douban"
+# url = "https://pypi.doubanio.com/simple/"
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
