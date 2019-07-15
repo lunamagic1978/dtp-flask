@@ -120,9 +120,10 @@ class Project(db.Entity):
                       and p.name == name and p.delete_flag == "f")
 
         if check_name:
+            obj.swagger_json = swagger_json
             return {
-                "code": 500,
-                "msg": "Project重名，请检查"
+                "code": 200,
+                "msg": "编辑成功"
             }
         else:
             obj.swagger_json = swagger_json

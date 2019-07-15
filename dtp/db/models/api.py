@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from dtp.db.db import db
-from pony.orm import (Json, PrimaryKey, Required, db_session, select, desc, get)
+from pony.orm import (Json, PrimaryKey, Required, db_session, select, desc, get, Set)
 import uuid
 import datetime
 import json
@@ -26,6 +26,9 @@ class Api(db.Entity):
     delete_flag = Required(bool, default=False)
     swagger_json = Required(Json, index=True)
     api_json = Required(Json, index=True)
+    order = Required(int, index=True)
+    tag = Required(str, index=True)
+    testcase = Set("TestCase")
 
     @classmethod
     @db_session
@@ -41,23 +44,28 @@ class Api(db.Entity):
                 "msg": "yaml格式不正确，请检查"
             }
         user = body.get("user")
+        count = 1
         for path ,v  in swagger.get("paths").items():
             for method, swagger_content in v.items():
                 api_query = get(a for a in Api if a.delete_flag == "f" and a.project.name == project
                                 and a.project.delete_flag =="f" and a.project.namespace.name == namespace
                                 and a.project.namespace.delete_flag == "f" and a.path == path and
                                 a.method == method)
+                api_name = swagger_content.get("summary")
+                tag = swagger_content.get("tags")
                 if api_query:
-                    print("need updata")
+                    api_query.api_json = swagger_content
+                    api_query.name = api_name
+                    api_query.order = count
+                    api_query.tag = tag[0]
                 else:
-                    api_name = swagger_content.get("summary")
 
                     try:
                         project_obj = get(p for p in Project if p.delete_flag == "f" and p.name == project and
                                           p.namespace.name == namespace and p.namespace.delete_flag == "f")
                         Api(name=api_name, user=user, project=project_obj.id, path=path, method=method,
                             swagger_json=swagger_json, swagger_type=body.get("swagger_type"), info=info,
-                            api_json = swagger_content)
+                            api_json = swagger_content, order=count, tag=tag[0])
 
                     except Exception as e:
                         print(e)
@@ -65,6 +73,7 @@ class Api(db.Entity):
                             "code": 500,
                             "msg": "创建api失败"
                         }
+                count = count + 1
         return {
             "code": 200,
             "msg": "创建api成功"
@@ -75,7 +84,7 @@ class Api(db.Entity):
     def list(cls, namespace, project, info={}):
         api_query = select(a for a in Api if a.delete_flag == "f" and a.project.name == project
                            and a.project.delete_flag =="f" and a.project.namespace.name == namespace
-                           and a.project.namespace.delete_flag == "f")
+                           and a.project.namespace.delete_flag == "f").order_by(Api.order)
         data = []
         for api in api_query:
             tmp = {}
@@ -126,33 +135,23 @@ class Api(db.Entity):
         api_query = get(a for a in Api if a.delete_flag == "f" and a.project.name == project and a.path == path
                            and a.project.delete_flag =="f" and a.project.namespace.name == namespace
                            and a.project.namespace.delete_flag == "f" and a.method == method)
-        tmp = json.dumps(api_query.api_json)
-        content = json.loads(tmp)
 
+        ref_query = get(a for a in Ref if a.delete_flag == "f" and a.project.name == project
+                           and a.project.delete_flag =="f" and a.project.namespace.name == namespace)
 
-
-        def swagger_ref(content):
-            if isinstance(content, dict):
-                for k, v in content.items():
-                    if isinstance(v, dict):
-                        tmp = v.get("$ref")
-                        if tmp:
-                            ref_name = tmp[2:]
-                            ref = get(a for a in Ref if a.delete_flag == "f" and a.project.name == project
-                                         and a.project.delete_flag == "f" and a.project.namespace.name == namespace
-                                         and a.project.namespace.delete_flag == "f" and a.name == ref_name)
-                            content[k] = ref.ref_json
-                    swagger_ref(v)
-        swagger_ref(content)
+        tmp_dict = {"paths": {path: {method: api_query.api_json}}}
+        if ref_query:
+            tmp_ref = json.loads(ref_query.swagger_json)
+            tmp_dict.update(tmp_ref)
+        data = json.dumps((tmp_dict))
         return {
                     "code": 200,
-                    "data": content,
+                    "data": data,
                 }
 
     @classmethod
     @db_session
     def demo(cls, namespace,  project, path, method):
-        print(namespace, project, path, method)
         re_dict = {}
         project_query = get(a for a in Project if a.delete_flag == "f" and a.name == project
                             and a.namespace.delete_flag == "f" and a.namespace.name == namespace)
@@ -165,18 +164,44 @@ class Api(db.Entity):
         tmp = json.loads(tmp)
         tmp_dict = {"paths": { path: { method: tmp}}}
         re_dict.update(tmp_dict)
-
-        ref_querys = select(a for a in Ref if a.project.delete_flag == "f" and a.project.name == project and
-                        a.project.namespace.name == namespace and a.project.namespace.delete_flag == "f" and
-                        a.delete_flag == "f")
-        ref_querys.show()
-        tmp_dict = {"components": {"schemas": {}}}
-        for ref in ref_querys:
-            tmp_name = ref.name
-            tmp_name_list = tmp_name.split("/")
-            tmp_dict["components"]["schemas"][tmp_name_list[2]] = ref.ref_json
-        re_dict.update(tmp_dict)
+        ref_obj = get(a for a in Ref if a.project.delete_flag == "f" and a.project.name == project and
+                      a.project.namespace.name == namespace and a.project.namespace.delete_flag == "f" and
+                      a.delete_flag == "f")
+        if ref_obj:
+            ref_json = json.loads(ref_obj.swagger_json)
+            re_dict.update(ref_json)
         return re_dict
 
 
+    @classmethod
+    @db_session
+    def update(cls, namespace,  project, path, method, body):
+        user = body.get("user")
+        api_detail = body.get("api_detail")
+        tmp_dict = json.loads(api_detail)
+        print(tmp_dict)
+        tmp_api = tmp_dict.get("paths").get(path).get(method)
+        tmp_dict.pop("paths")
+        if tmp_api:
+            api_query = get(a for a in Api if a.delete_flag == "f" and a.project.name == project and a.path == path
+                               and a.project.delete_flag =="f" and a.project.namespace.name == namespace
+                               and a.project.namespace.delete_flag == "f" and a.method == method)
+
+            api_name = tmp_api.get("summary")
+            api_query.api_json = tmp_api
+            api_query.name = api_name
+
+            ref_query = get(a for a in Ref if a.delete_flag == "f" and a.project.name == project
+                               and a.project.delete_flag =="f" and a.project.namespace.name == namespace)
+            tmp_ref = json.dumps(tmp_dict)
+            if ref_query:
+                ref_query.swagger_json = tmp_ref
+            return {
+                "code": 200,
+                "msg": "更新api成功"
+            }
+        return {
+                "code": 200,
+                "msg": "更新api失败"
+            }
 

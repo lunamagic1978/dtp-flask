@@ -16,3 +16,7 @@ def detail(namespace, project, path, method):
 def demo(namespace, project, path, method):
     result = Api.demo(namespace, project, path, method)
     return json.dumps(result, ensure_ascii=False, indent=2)
+
+def update(namespace, project, path, method, body):
+    result = Api.update(namespace, project, path, method, body)
+    return json.dumps(result, ensure_ascii=False, indent=2)

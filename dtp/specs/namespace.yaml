@@ -283,6 +283,36 @@ paths:
               schema:
                 type: object
 
+    put:
+      summary: update ref
+      description: update ref
+      operationId: dtp.api.ref.update
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ref"
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
   /namespaces/{namespace}/projects/{project}/detail:
     get:
       summary: get detail api
@@ -313,6 +343,55 @@ paths:
           required: true
           schema:
             type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    put:
+      summary: update detail api
+      description: update detail api
+      operationId: dtp.api.api.update
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: name of the project
+          required: true
+          schema:
+            type: string
+        - name: path
+          in: query
+          description: uid of the api
+          required: true
+          schema:
+            type: string
+        - name: method
+          in: query
+          description: uid of the api
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["api_detail"]
+              properties:
+                api_detail:
+                  type: string
+                  minLength: 2
+                user:
+                  type: string
       responses:
         200:
           description: new project response
@@ -359,6 +438,194 @@ paths:
               schema:
                 type: object
 
+  /namespaces/{namespace}/env:
+    get:
+      summary: get env
+      description: get env
+      operationId: dtp.api.env.get
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    post:
+      summary: create env
+      description: create env
+      operationId: dtp.api.env.post
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["name"]
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                user:
+                  type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+  /namespaces/{namespace}/envs/{env}/global:
+    post:
+      summary: create global of env
+      description: create global of env
+      operationId: dtp.api.env.globalsourcecreate
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: name of the env
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["metadate"]
+              properties:
+                metadate:
+                  type: string
+                  minLength: 2
+                user:
+                  type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    get:
+      summary: create global of env
+      description: create global of env
+      operationId: dtp.api.env.globalsourceget
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: name of the env
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+  /namespaces/{namespace}/projects/{project}/envs/{env}/project:
+    post:
+      summary: create project of env
+      description: create global of env
+      operationId: dtp.api.env.projectsourcecreate
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: project of the env
+          required: true
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: name of the env
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: "object"
+              required: ["metadate"]
+              properties:
+                metadate:
+                  type: string
+                  minLength: 2
+                user:
+                  type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
+
+    get:
+      summary: get list of project env
+      description: get list of project env
+      operationId: dtp.api.env.projectsourceget
+      parameters:
+        - name: namespace
+          in: path
+          description: name of the namespace
+          required: true
+          schema:
+            type: string
+        - name: project
+          in: path
+          description: project of the env
+          required: true
+          schema:
+            type: string
+        - name: env
+          in: path
+          description: name of the env
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: new project response
+          content:
+            text/plain:
+              schema:
+                type: object
 
 components:
   schemas:

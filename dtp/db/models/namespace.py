@@ -17,6 +17,7 @@ class Namespace(db.Entity):
     user = Required(str, index=True)
     delete_flag = Required(bool, default=False)
     project = Set("Project")
+    env = Set("Env")
 
 
     @classmethod
